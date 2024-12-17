@@ -1,0 +1,17 @@
+/_build/
+/cover/
+/deps/
+/doc/
+/log/
+/.fetch
+/.elixir_ls/
+erl_crash.dump
+*.ez
+.erlang.cookie
+env.sh
+.envrc
+.tool-versions
+/.ash_history
+/.mix
+/.hex
+/.elixir-tools/
