@@ -23,7 +23,8 @@ defmodule Swarming.MixProject do
   defp deps do
     [
       {:libcluster, "~> 3.4"},
-      # {:cloister, "~> 0.13"},
+      {:cloister, "~> 0.13"},
+      {:horde, "~> 0.8.5"},
       {:swarm_dynamic_supervisor, "~> 0.1.0"},
       {:swarm, "~> 3.0"}
       # {:dep_from_hexpm, "~> 0.3.0"},

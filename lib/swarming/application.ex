@@ -10,7 +10,9 @@ defmodule Swarming.Application do
     children = [
       # Starts a worker by calling: Swarming.Worker.start_link(arg)
       # {Swarming.Worker, arg}
-      {Cluster.Supervisor, [Application.get_env(:libcluster, :topologies), [name: Swarming.ClusterSupervisor]]},
+      # {Cluster.Supervisor, [Application.get_env(:libcluster, :topologies), [name: Swarming.ClusterSupervisor]]},
+      {Horde.Registry, [name: Swarming.HordeRegistry, keys: :unique]},
+      Swarming.HordeSupervisor,
       Swarming.DynamicSupervisor
     ]
 
