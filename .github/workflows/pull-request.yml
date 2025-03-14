@@ -1,5 +1,6 @@
 name: PR Lint
 
+except: [develop]
 on: [pull_request]
 
 jobs:
