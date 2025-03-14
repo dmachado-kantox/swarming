@@ -1,0 +1,27 @@
+name: "Rollback WorkFlow"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Choose the environment:"
+        required: true
+        type: choice
+        default: "staging"
+        # SET THE ENVIRONMENTS WHERE YOUR SERVICE NEEDS TO BE DEPLOYED
+        options:
+          - staging
+          - common
+
+      version:
+        description: "Re-use an image ♻️:"
+        required: false
+        type: string
+
+jobs:
+  rollback:
+    uses: kantox/infrastructure-github-workflows/.github/workflows/code-ecs-rollback.yml@v0.6
+    secrets: inherit
+    with:
+      version: ${{ github.event.inputs.version  }}
+      environment: ${{ github.event.inputs.environment  }}

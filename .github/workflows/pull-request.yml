@@ -1,0 +1,26 @@
+name: PR Lint
+
+on: [pull_request]
+
+jobs:
+  pr_lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add info to PR title and description
+        uses: tzkhan/pr-update-action@v1.1.1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}" # required - allows the action to make calls to GitHub's rest API
+          branch-regex: '[A-Z]+-\d+|dependabot/' # required - regex to match text from the head branch name
+          lowercase-branch: false # optional - whether to lowercase branch name before matching
+          title-template: "[%branch%]" # optional - text template to prefix title
+          title-prefix-space: true # optional - whether to add a space after title prefix
+          uppercase-title: true # optional - whether to uppercase title prefix
+          body-template: "[%branch%](https://kantox.atlassian.net/browse/%branch%)" # optional - text template to prefix body
+          body-prefix-newline-count: 2 # optional - number of newlines to insert after body prefix
+          uppercase-body: true
+
+      - name: Ensure correct branch naming
+        uses: vijaykramesh/pr-lint-action@v1.1
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

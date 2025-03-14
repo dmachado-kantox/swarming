@@ -1,0 +1,5 @@
+projects: ["CL", "MIC", "develop"]
+check_title: true
+check_branch: true
+check_commits: false
+ignore_case: false

@@ -1,0 +1,74 @@
+name: Build and Test
+
+on: push
+
+env:
+  ELIXIR_VERSION: 1.17
+  MIX_ENV: test
+  OTP_VERSION: 26
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    services:
+      rabbitmq:
+        image: rabbitmq:management-alpine
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd "rabbitmqctl node_health_check"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Elixir v${{ env.ELIXIR_VERSION }}-otp-${{ env.OTP_VERSION }}
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          path: deps
+          key: deps-${{ env.MIX_ENV }}-v${{ env.ELIXIR_VERSION }}-otp-${{ env.OTP_VERSION }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: |
+            deps-${{ env.MIX_ENV }}-v${{ env.ELIXIR_VERSION }}-otp-${{ env.OTP_VERSION }}-
+      - name: Cache Dialyzer PLTs
+        uses: actions/cache@v4
+        with:
+          path: _build/plts
+          key: plts-v${{ env.ELIXIR_VERSION }}-otp-${{ env.OTP_VERSION }}-r2-${{ github.sha }}
+          restore-keys: |
+            plts-v${{ env.ELIXIR_VERSION }}-otp-${{ env.OTP_VERSION }}-r2-
+      - name: Get Dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          mix deps.get
+      - name: Check Source Code Formatting
+        run: mix format --check-formatted
+
+      - name: Setup RabbitMQ
+        run: |
+          curl -X POST -u guest:guest -H 'Content-Type: application/json' -T local/rabbitmq/config.json http://localhost:15672/api/definitions
+
+      - name: Start EPMD
+        run: |
+          epmd -daemon
+
+      - name: Run tests
+        run: mix coveralls.github
+        env:
+          GITHUB_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          SKIP_WORKER_TEST: true
+
+      - name: Run Dialyzer
+        run: mix cached_dialyzer
